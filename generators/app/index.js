@@ -2,6 +2,8 @@
 var yeoman = require('yeoman-generator');
 var chalk = require('chalk');
 var yosay = require('yosay');
+var camelize = require('camelize');
+var slug = require('slug');
 
 module.exports = yeoman.generators.Base.extend({
   prompting: function () {
@@ -9,22 +11,22 @@ module.exports = yeoman.generators.Base.extend({
 
     // Have Yeoman greet the user.
     this.log(yosay(
-      'Welcome to the riveting ' + chalk.red('Es6Scaffold') + ' generator!'
+      'Welcome to ' + chalk.red('Es6 Scaffold') + ' generator!'
     ));
 
     var prompts = [{
-      type: 'confirm',
-      name: 'someOption',
-      message: 'Would you like to enable this option?',
-      default: true
+      name: 'appName',
+      message: 'What is your module\'s name ?',
+      default: 'My Lib'
     }];
 
     this.prompt(prompts, function (props) {
-      this.props = props;
-      // To access props later use this.props.someOption;
-
+      this.appName = props.appName;
+      this.appSlug = slug(props.appName).toLowerCase();
+      this.appModule = camelize(this.appSlug);
       done();
     }.bind(this));
+
   },
 
   writing: {
@@ -34,20 +36,25 @@ module.exports = yeoman.generators.Base.extend({
         this.destinationPath('package.json')
       );
       this.fs.copy(
-        this.templatePath('_bower.json'),
-        this.destinationPath('bower.json')
+        this.templatePath('_README.md'),
+        this.destinationPath('README.md')
       );
     },
 
     projectfiles: function () {
-      this.fs.copy(
-        this.templatePath('editorconfig'),
-        this.destinationPath('.editorconfig')
-      );
-      this.fs.copy(
-        this.templatePath('jshintrc'),
-        this.destinationPath('.jshintrc')
-      );
+      var _this = this;
+      ['.editorconfig',
+        '.gitignore',
+        '.jshintrc',
+        'gulpfile.js',
+        'index.js',
+        'es6/index.js',
+        'test/myspec.specs.js'].forEach(function(file) {
+        _this.fs.copy(
+          _this.templatePath(file),
+          _this.destinationPath(file)
+        );
+      });
     }
   },
 
